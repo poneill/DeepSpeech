@@ -151,7 +151,7 @@ public class DeepSpeech {
         return fooOpaque
     }
 
-    public class func test(modelState: OpaquePointer, audioPath: String) {
+    public class func test(modelState: OpaquePointer, audioPath: String, completion: @escaping () -> ()) {
         let url = URL(fileURLWithPath: audioPath)
 
         //var format = AudioStreamBasicDescription.init()
@@ -181,17 +181,17 @@ public class DeepSpeech {
         //ExtAudioFileRead(file, <#T##ioNumberFrames: UnsafeMutablePointer<UInt32>##UnsafeMutablePointer<UInt32>#>, <#T##ioData: UnsafeMutablePointer<AudioBufferList>##UnsafeMutablePointer<AudioBufferList>#>)
         
         let stream = createStream(modelState: modelState)
+        print("\(audioPath)")
         let start = CFAbsoluteTimeGetCurrent()
         AudioContext.load(fromAudioURL: url, completionHandler: { audioContext in
             guard let audioContext = audioContext else {
                 fatalError("Couldn't create the audioContext")
             }
             render(audioContext: audioContext, stream: stream)
-            let result = DS_FinishStream(stream)
+            DS_FinishStream(stream)
             let end = CFAbsoluteTimeGetCurrent()
-            let asStr = String.init(cString: result!)
-            print("asStr: \(asStr)")
-            print("time: \(end - start)")
+            print("\"\(audioPath)\": \(end - start)")
+            completion()
         })
         
         //let file = try! AVAudioFile(forReading: url)
